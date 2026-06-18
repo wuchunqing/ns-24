@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google-site-verification" content="uz_j2c_UOuyTXyW6W87egnN8gHCyfSqm3kyY_XEx62w" />
+  <title>Hydration Status Checker | KSI × ACSM Athlete Hydration Assessment</title>
+  <meta name="description" content="Free professional hydration status checker using Armstrong 8-point urine chart, ACSM body-weight sweat test & KSI athlete guidelines. Assess dehydration, sweat rate & rehydration needs.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+    :root{
+      --primary:#0D9488;
+      --secondary:#14B8A6;
+      --water:#06B6D4;
+      --hydrated:#059669;
+      --mild:#D97706;
+      --danger:#DC2626;
+      --dark:#134E4A;
+      --gray-100:#F0FDFA;
+      --gray-200:#CCFBF1;
+      --gray-500:#5F7A78;
+      --gray-700:#2D4A47;
+      --card-bg:#FFFFFF;
+      --radius:14px;
+      --shadow:0 4px 16px rgba(13,148,136,0.1);
+    }
+    body{background:#F0FDFA;color:var(--dark);line-height:1.7}
+    .container{max-width:1120px;margin:0 auto;padding:0 20px}
+    header{background:var(--card-bg);border-bottom:1px solid var(--gray-200);padding:20px 0;position:sticky;top:0;z-index:99}
+    .header-inner{display:flex;justify-content:space-between;align-items:center}
+    .logo{font-size:24px;font-weight:700;color:var(--primary);text-decoration:none}
+    .hero{padding:50px 0 28px;text-align:center;background:linear-gradient(160deg,#CCFBF1 0%,#F0FDFA 50%,#FFFFFF 100%)}
+    .hero h1{font-size:38px;margin-bottom:14px;color:var(--dark)}
+    .hero p{max-width:820px;margin:0 auto;font-size:17px;color:var(--gray-500)}
+    .hero-badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+    .badge{padding:6px 14px;background:#fff;border:1px solid var(--gray-200);border-radius:20px;font-size:12px;font-weight:600;color:var(--gray-700)}
+    .ad-top{display:flex;justify-content:center;margin:28px auto}
+    .main-grid{display:grid;grid-template-columns:1fr 310px;gap:28px;margin-bottom:45px}
+    .card-box{background:var(--card-bg);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);border:1px solid var(--gray-200);margin-bottom:24px}
+    .card-title{font-size:22px;font-weight:600;margin-bottom:6px}
+    .card-subtitle{font-size:15px;color:var(--gray-500);margin-bottom:22px}
+
+    .mode-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+    .mode-tab{padding:10px 16px;border:2px solid var(--gray-200);border-radius:10px;background:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:.2s}
+    .mode-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+    .mode-tab:hover:not(.active){border-color:var(--secondary);color:var(--primary)}
+
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+    .form-group{margin-bottom:16px}
+    .form-group label{display:block;margin-bottom:8px;font-weight:500;font-size:14px;color:var(--gray-700)}
+    .form-control{width:100%;padding:13px 15px;border:1px solid var(--gray-200);border-radius:10px;font-size:15px;outline:none;transition:.2s}
+    .form-control:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(13,148,136,.12)}
+    select.form-control{appearance:none;background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");background-repeat:no-repeat;background-position:right 14px center;background-size:14px}
+    .unit-toggle{display:flex;gap:10px;margin-bottom:20px}
+    .unit-btn{padding:8px 14px;border:1px solid var(--gray-200);border-radius:8px;background:#fff;cursor:pointer;font-size:14px;font-weight:500}
+    .unit-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+    .calc-btn{width:100%;padding:16px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;transition:.25s}
+    .calc-btn:hover{background:#0F766E}
+
+    /* Armstrong urine chart */
+    .urine-chart-label{font-size:14px;font-weight:600;margin-bottom:12px;color:var(--gray-700)}
+    .urine-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:8px}
+    .urine-swatch{
+      border:3px solid transparent;border-radius:12px;padding:10px 6px;cursor:pointer;
+      text-align:center;transition:.2s;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.06);
+    }
+    .urine-swatch:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+    .urine-swatch.selected{border-color:var(--primary);box-shadow:0 0 0 3px rgba(13,148,136,.25)}
+    .swatch-color{height:44px;border-radius:8px;margin-bottom:6px;border:1px solid rgba(0,0,0,.08)}
+    .swatch-num{font-size:11px;font-weight:700;color:var(--gray-500)}
+    .swatch-name{font-size:10px;color:var(--gray-500);line-height:1.3;margin-top:2px}
+    .chart-legend{font-size:12px;color:var(--gray-500);text-align:center;margin-top:8px}
+    .chart-arrow{display:flex;justify-content:space-between;font-size:11px;font-weight:600;margin-top:6px}
+    .arrow-hydrated{color:var(--hydrated)} .arrow-dehydrated{color:var(--danger)}
+
+    /* Symptom checklist */
+    .symptom-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .symptom-item{display:flex;align-items:flex-start;gap:10px;padding:12px;background:#F0FDFA;border-radius:10px;border:1px solid var(--gray-200);cursor:pointer;font-size:14px}
+    .symptom-item input{margin-top:3px;accent-color:var(--primary);flex-shrink:0}
+    .symptom-item.checked{border-color:var(--primary);background:#F0FDFA}
+
+    /* Result panel */
+    .result-panel{display:none;margin-top:24px}
+    .status-banner{
+      padding:28px;border-radius:14px;text-align:center;margin-bottom:22px;color:#fff;
+    }
+    .status-banner h3{font-size:26px;font-weight:800;margin-bottom:6px}
+    .status-banner p{font-size:15px;opacity:.95}
+    .status-well{background:linear-gradient(135deg,#059669,#047857)}
+    .status-mild{background:linear-gradient(135deg,#D97706,#B45309)}
+    .status-mod{background:linear-gradient(135deg,#EA580C,#C2410C)}
+    .status-severe{background:linear-gradient(135deg,#DC2626,#B91C1C)}
+    .status-critical{background:linear-gradient(135deg,#7F1D1D,#450A0A)}
+
+    .score-ring-wrap{display:flex;justify-content:center;margin:20px 0}
+    .score-ring{
+      width:120px;height:120px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+      flex-direction:column;font-weight:800;border:6px solid;
+    }
+    .score-ring .num{font-size:36px;line-height:1}
+    .score-ring .lbl{font-size:11px;text-transform:uppercase;letter-spacing:1px;opacity:.8}
+
+    .result-card{padding:20px;border:1px solid var(--gray-200);border-radius:12px;margin-bottom:14px;background:#FAFAFA}
+    .result-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--gray-200);font-size:15px}
+    .result-row:last-child{border:none}
+    .result-row .label{color:var(--gray-700);font-weight:500}
+    .result-row .value{font-weight:700;color:var(--primary);text-align:right;max-width:55%}
+    .action-list{margin-top:14px}
+    .action-item{padding:12px 14px;background:#fff;border-radius:10px;margin-bottom:8px;font-size:14px;border-left:4px solid var(--water);color:var(--gray-700)}
+    .print-btn{margin-top:16px;padding:12px 22px;background:var(--dark);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600}
+
+    .info-box{background:#F0FDFA;border-left:4px solid var(--primary);padding:18px;border-radius:10px;margin:24px 0}
+    .info-box h4{margin-bottom:8px}
+    .info-box ul,.info-box ol{margin-left:20px;font-size:14px;color:var(--gray-700)}
+    .info-box li{margin-bottom:5px}
+    .warning-box{background:#FEF2F2;border-left:4px solid var(--danger);padding:18px;border-radius:10px;margin:24px 0}
+    .warning-box h4{color:var(--danger);margin-bottom:8px}
+    .guide-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:20px 0}
+    .guide-card{padding:20px;background:#fff;border:1px solid var(--gray-200);border-radius:12px}
+    .guide-card h4{font-size:16px;margin-bottom:10px}
+    .guide-card p,.guide-card li{font-size:14px;color:var(--gray-500)}
+    .guide-card ul{margin-left:18px;margin-top:8px}
+    .faq-block{margin:36px 0 20px}
+    .faq-title{font-size:22px;font-weight:600;margin-bottom:22px}
+    .faq-item{padding:16px 0;border-bottom:1px solid var(--gray-200)}
+    .faq-item h4{font-size:16px;margin-bottom:8px}
+    .faq-item p{font-size:14px;color:var(--gray-500)}
+    .tool-chain{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+    .tool-link{padding:8px 14px;background:#F0FDFA;border-radius:8px;font-size:13px;color:var(--primary);text-decoration:none;font-weight:500;border:1px solid #99F6E4}
+    .tool-link:hover{background:var(--primary);color:#fff}
+
+    .sidebar-container{display:flex;flex-direction:column;gap:24px}
+    .sidebar-card{background:var(--card-bg);border-radius:var(--radius);padding:26px;box-shadow:var(--shadow);border:1px solid var(--gray-200)}
+    .sidebar-card h3{font-size:18px;margin-bottom:16px}
+    .sidebar-list{list-style:none}
+    .sidebar-list li{padding:8px 0;font-size:14px;color:var(--gray-700);display:flex;align-items:flex-start}
+    .sidebar-list li::before{content:"💧";margin-right:10px;flex-shrink:0}
+    .ksi-ref{font-size:12px;color:var(--gray-500);padding:12px;background:#ECFEFF;border-radius:8px;border:1px solid #A5F3FC;margin-top:12px;line-height:1.6}
+    .ad-sidebar{width:100%;height:250px;border-radius:var(--radius);overflow:hidden}
+    .ad-bottom{display:flex;justify-content:center;margin:50px auto 36px}
+    footer{background:var(--card-bg);border-top:1px solid var(--gray-200);padding:40px 0;text-align:center;color:var(--gray-500);font-size:14px}
+    .disclaimer{font-size:12px;color:var(--gray-500);margin-top:16px;padding:12px;background:#F0FDFA;border-radius:8px;border:1px solid var(--gray-200)}
+    .panel{display:none}
+    .panel.active{display:block}
+
+    @media(max-width:820px){
+      .main-grid{grid-template-columns:1fr}
+      .sidebar-container{order:-1;margin-bottom:24px}
+      .form-row,.symptom-grid,.guide-grid{grid-template-columns:1fr}
+      .urine-grid{grid-template-columns:repeat(2,1fr)}
+      .hero h1{font-size:30px}
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="container header-inner">
+    <a href="#" class="logo">RunPerformance Tools</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <h1>Hydration Status Checker</h1>
+    <p>Professional athlete hydration assessment combining the Armstrong 8-point urine color chart, ACSM pre/post body-weight sweat test & Korey Stringer Institute (KSI) field protocols — the same framework used by NCAA, NFL & endurance coaches worldwide.</p>
+    <div class="hero-badges">
+      <span class="badge">KSI Protocol</span>
+      <span class="badge">ACSM Position Stand</span>
+      <span class="badge">Armstrong Urine Chart</span>
+      <span class="badge">Sweat Rate Calculator</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+  <div class="ad-top">
+    <script>atOptions={'key':'b31a21d357a574f5abfe948e08497cc3','format':'iframe','height':90,'width':728,'params':{}};</script>
+    <script src="https://www.highperformanceformat.com/b31a21d357a574f5abfe948e08497cc3/invoke.js"></script>
+    <script data-cfasync="false" src="https://adsterra-xxx1.js"></script>
+  </div>
+
+  <div class="main-grid">
+    <div class="content-block">
+      <div class="unit-toggle">
+        <button class="unit-btn active" id="unitMetric">Metric (kg / L)</button>
+        <button class="unit-btn" id="unitImperial">Imperial (lb / fl oz)</button>
+      </div>
+
+      <div class="card-box">
+        <h2 class="card-title">Comprehensive Hydration Assessment</h2>
+        <p class="card-subtitle">Select assessment mode. For race-day readiness, use the Full Assessment tab — mirrors KSI's multi-marker athlete hydration screen.</p>
+
+        <div class="mode-tabs" id="modeTabs">
+          <button class="mode-tab active" data-mode="full">Full Assessment</button>
+          <button class="mode-tab" data-mode="urine">Urine Color Only</button>
+          <button class="mode-tab" data-mode="sweat">Sweat Rate Test</button>
+        </div>
+
+        <!-- Armstrong Chart (all modes except sweat-only partial) -->
+        <div id="urineSection">
+          <div class="urine-chart-label">Armstrong 8-Point Urine Color Chart <span style="font-weight:400;color:var(--gray-500)">— first morning or mid-stream sample</span></div>
+          <div class="urine-grid" id="urineGrid"></div>
+          <div class="chart-arrow"><span class="arrow-hydrated">← Well Hydrated</span><span class="arrow-dehydrated">Dehydrated →</span></div>
+          <p class="chart-legend">Validated by Armstrong et al. (1994, 1998) · Used by KSI, USOC & Runner's World</p>
+        </div>
+
+        <!-- Sweat rate panel -->
+        <div id="sweatSection" style="margin-top:22px">
+          <h3 style="font-size:17px;font-weight:600;margin-bottom:14px">ACSM Body-Weight Sweat Rate Test</h3>
+          <p style="font-size:14px;color:var(--gray-500);margin-bottom:16px">Weigh nude or in minimal clothing before & after exercise. Void bladder before pre-weight. Record all fluid intake during session.</p>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Pre-Exercise Weight (<span class="wUnit">kg</span>)</label>
+              <input class="form-control" id="preWeight" type="number" step="0.1" min="30" placeholder="e.g. 70.5">
+            </div>
+            <div class="form-group">
+              <label>Post-Exercise Weight (<span class="wUnit">kg</span>)</label>
+              <input class="form-control" id="postWeight" type="number" step="0.1" min="30" placeholder="e.g. 69.2">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Fluid Consumed During Exercise (<span class="volUnit">L</span>)</label>
+              <input class="form-control" id="fluidIntake" type="number" step="0.1" min="0" value="0" placeholder="0">
+            </div>
+            <div class="form-group">
+              <label>Exercise Duration (minutes)</label>
+              <input class="form-control" id="exerciseDuration" type="number" step="1" min="15" max="360" value="60" placeholder="60">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Sport / Environment</label>
+              <select class="form-control" id="sportEnv">
+                <option value="normal">Moderate Temp Running/Cycling</option>
+                <option value="hot">Hot Weather (>30°C / 86°F)</option>
+                <option value="humid">High Humidity</option>
+                <option value="indoor">Indoor / Climate Controlled</option>
+                <option value="crossfit">CrossFit / HIIT</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Training Phase</label>
+              <select class="form-control" id="trainingPhase">
+                <option value="training">Training Day</option>
+                <option value="race">Race / Competition Day</option>
+                <option value="recovery">Recovery Day</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Symptoms (full & urine modes) -->
+        <div id="symptomSection" style="margin-top:22px">
+          <h3 style="font-size:17px;font-weight:600;margin-bottom:14px">Subjective Hydration Symptoms</h3>
+          <div class="symptom-grid" id="symptomGrid">
+            <label class="symptom-item"><input type="checkbox" value="thirst" class="symptom-cb"> Strong thirst during/after exercise</label>
+            <label class="symptom-item"><input type="checkbox" value="drymouth" class="symptom-cb"> Dry mouth or sticky saliva</label>
+            <label class="symptom-item"><input type="checkbox" value="headache" class="symptom-cb"> Headache or lightheadedness</label>
+            <label class="symptom-item"><input type="checkbox" value="fatigue" class="symptom-cb"> Unusual fatigue or weakness</label>
+            <label class="symptom-item"><input type="checkbox" value="cramps" class="symptom-cb"> Muscle cramps</label>
+            <label class="symptom-item"><input type="checkbox" value="dizzy" class="symptom-cb"> Dizziness on standing</label>
+            <label class="symptom-item"><input type="checkbox" value="hr" class="symptom-cb"> Elevated resting heart rate</label>
+            <label class="symptom-item"><input type="checkbox" value="nourine" class="symptom-cb"> Minimal urine output</label>
+          </div>
+        </div>
+
+        <!-- Daily intake (full mode) -->
+        <div id="intakeSection" style="margin-top:22px">
+          <h3 style="font-size:17px;font-weight:600;margin-bottom:14px">Daily Fluid Intake (Optional)</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Total Fluids Today (<span class="volUnit">L</span>)</label>
+              <input class="form-control" id="dailyFluid" type="number" step="0.1" min="0" placeholder="e.g. 2.5">
+            </div>
+            <div class="form-group">
+              <label>Body Weight (<span class="wUnit">kg</span>) — for intake target</label>
+              <input class="form-control" id="bodyWeight" type="number" step="0.1" min="30" placeholder="e.g. 70">
+            </div>
+          </div>
+        </div>
+
+        <button class="calc-btn" id="assessBtn" style="margin-top:20px">RUN HYDRATION ASSESSMENT</button>
+
+        <!-- Results -->
+        <div class="result-panel" id="resultPanel">
+          <div class="status-banner" id="statusBanner">
+            <h3 id="statusTitle">—</h3>
+            <p id="statusDesc">—</p>
+          </div>
+          <div class="score-ring-wrap">
+            <div class="score-ring" id="scoreRing">
+              <span class="num" id="scoreNum">—</span>
+              <span class="lbl">Hydration Score</span>
+            </div>
+          </div>
+          <div class="result-card">
+            <div class="result-row"><span class="label">Urine Color Index (1–8)</span><span class="value" id="resUrine">—</span></div>
+            <div class="result-row"><span class="label">Body Weight Change</span><span class="value" id="resWeightLoss">—</span></div>
+            <div class="result-row"><span class="label">Sweat Rate</span><span class="value" id="resSweatRate">—</span></div>
+            <div class="result-row"><span class="label">Estimated Fluid Loss</span><span class="value" id="resFluidLoss">—</span></div>
+            <div class="result-row"><span class="label">ACSM Rehydration Target (150%)</span><span class="value" id="resRehydrate">—</span></div>
+            <div class="result-row"><span class="label">Sodium Replacement Estimate</span><span class="value" id="resSodium">—</span></div>
+            <div class="result-row"><span class="label">Symptom Risk Level</span><span class="value" id="resSymptoms">—</span></div>
+            <div class="result-row"><span class="label">Daily Intake vs Target</span><span class="value" id="resDaily">—</span></div>
+          </div>
+          <h4 style="font-size:16px;font-weight:600;margin:18px 0 10px">Personalized Action Plan</h4>
+          <div class="action-list" id="actionList"></div>
+          <button class="print-btn" id="printBtn">Print Hydration Report</button>
+          <div class="disclaimer" style="margin-top:16px">
+            * Assessment based on ACSM Exercise & Fluid Replacement Position Stand, Armstrong urine color scale & KSI heat/hydration field protocols. Not a medical diagnosis.
+          </div>
+        </div>
+      </div>
+
+      <!-- Armstrong reference chart visual -->
+      <div class="card-box">
+        <h2 class="card-title">Armstrong Urine Color Scale Reference</h2>
+        <p class="card-subtitle">The gold-standard field tool for hydration monitoring when lab testing (urine specific gravity / osmolality) is unavailable.</p>
+        <div class="guide-grid">
+          <div class="guide-card">
+            <h4>Colors 1–2: Well Hydrated</h4>
+            <p>Pale to very pale yellow. Urine specific gravity typically &lt;1.010. Optimal for training & competition. Maintain current fluid habits.</p>
+          </div>
+          <div class="guide-card">
+            <h4>Colors 3–4: Adequate / Mild</h4>
+            <p>Light yellow to straw. Acceptable for most athletes. Increase fluid 300–500 ml before next session if exercising in heat.</p>
+          </div>
+          <div class="guide-card">
+            <h4>Colors 5–6: Dehydrated</h4>
+            <p>Amber to dark yellow. Performance decrements likely. ACSM: drink 5–7 ml/kg body weight 4 hours before exercise; add electrolytes.</p>
+          </div>
+          <div class="guide-card">
+            <h4>Colors 7–8: Severely Dehydrated</h4>
+            <p>Dark amber to brown/orange. Stop intense exercise. Rehydrate with electrolyte solution. Seek medical care if accompanied by confusion or no urine &gt;8 hrs.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACSM weight loss thresholds -->
+      <div class="info-box">
+        <h4>ACSM Body-Weight Dehydration Thresholds (During Exercise)</h4>
+        <ol>
+          <li><strong>&lt;1% loss:</strong> Minimal — euhydrated to mildly hypohydrated; no action required</li>
+          <li><strong>1–2% loss:</strong> Mild dehydration — thirst, performance may decline 2–5% (endurance)</li>
+          <li><strong>2–3% loss:</strong> Significant — KSI red flag for athletes; impaired thermoregulation & cognitive function</li>
+          <li><strong>&gt;3% loss:</strong> Serious — stop exercise, aggressive rehydration, medical evaluation if symptomatic</li>
+          <li><strong>Rehydration formula:</strong> Drink 150% of fluid lost (1.5 × sweat loss) over 2–4 hours with sodium (460–1150 mg/L)</li>
+        </ol>
+      </div>
+
+      <div class="info-box">
+        <h4>Complete Endurance Nutrition Loop</h4>
+        <p style="font-size:14px;margin-bottom:10px">Pair this checker with your training toolkit for a full hydration → electrolyte → fuel → performance workflow:</p>
+        <div class="tool-chain">
+          <span class="tool-link">Hydration Checker ✓</span>
+          <span class="tool-link">Electrolyte Calculator</span>
+          <span class="tool-link">Carb Loading Planner</span>
+          <span class="tool-link">Calorie Burn Calculator</span>
+          <span class="tool-link">CrossFit WOD Timer</span>
+        </div>
+      </div>
+
+      <div class="warning-box">
+        <h4>KSI Heat Illness Warning Signs</h4>
+        <p style="font-size:14px;margin-bottom:8px">The Korey Stringer Institute recommends immediate medical removal from activity if an athlete exhibits:</p>
+        <ul style="margin-left:20px;font-size:14px">
+          <li>Core temp &gt;40°C (104°F) with CNS dysfunction</li>
+          <li>Collapse, confusion, or loss of consciousness</li>
+          <li>&gt;4% body weight loss in single session</li>
+          <li>No urine production for extended period with dark urine color 7–8</li>
+        </ul>
+      </div>
+
+      <div class="faq-block">
+        <h2 class="faq-title">Hydration Assessment FAQ</h2>
+        <div class="faq-item">
+          <h4>How accurate is the urine color chart?</h4>
+          <p>Armstrong's 8-point scale correlates with urine specific gravity (r ≈ 0.75–0.85) in field conditions. Best used on first morning void or mid-stream sample. Vitamins (B2), beets & certain medications can cause false readings — note these factors.</p>
+        </div>
+        <div class="faq-item">
+          <h4>How do I perform the sweat rate test correctly?</h4>
+          <p>Per ACSM & Runner's World protocols: (1) Void bladder, (2) weigh dry pre-exercise, (3) exercise without drinking initially for accurate loss (or track all intake), (4) towel dry sweat, (5) weigh post-exercise. Sweat rate (L/h) = [(pre − post) + fluid consumed] ÷ hours exercised.</p>
+        </div>
+        <div class="faq-item">
+          <h4>What is the 150% rehydration rule?</h4>
+          <p>ACSM recommends consuming 150% of measured fluid deficit to account for ongoing urine losses during recovery. Spread over 2–4 hours. Include 20–50 mmol/L sodium (460–1150 mg/L) to retain fluid — plain water alone is insufficient after heavy sweating.</p>
+        </div>
+        <div class="faq-item">
+          <h4>How much should I drink daily as an endurance athlete?</h4>
+          <p>Baseline: 30–40 ml/kg body weight/day (ACSM), plus sweat losses. A 70 kg runner needs ~2.1–2.8 L baseline + exercise replacement. Hot environments may push total needs to 4–6 L. Use this checker + sweat rate test for personalization.</p>
+        </div>
+        <div class="faq-item">
+          <h4>Can I be over-hydrated?</h4>
+          <p>Yes — exercise-associated hyponatremia (EAH) occurs from excessive plain water without sodium, especially in long events. Never drink beyond thirst in events &lt;4 hours unless following a proven race nutrition plan. Pair hydration with electrolyte replacement.</p>
+        </div>
+        <div class="faq-item">
+          <h4>When should I check urine color?</h4>
+          <p>KSI & BiteKit recommend: first morning void (best baseline), pre-workout, and post-workout. Consistent color 3+ across multiple days suggests chronic mild dehydration — increase daily fluid by 500 ml and review electrolyte intake.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-container">
+      <div class="sidebar-card">
+        <h3>Pre-Workout Hydration (ACSM)</h3>
+        <ul class="sidebar-list">
+          <li>5–7 ml/kg body weight 4 hrs before exercise</li>
+          <li>Additional 3–5 ml/kg if urine color ≥4</li>
+          <li>Include 200–300 mg sodium in pre-race drink</li>
+          <li>Avoid overdrinking — drink to thirst for events &lt;1 hr</li>
+          <li>Test sweat rate in race conditions</li>
+        </ul>
+      </div>
+      <div class="sidebar-card">
+        <h3>During Exercise Guidelines</h3>
+        <ul class="sidebar-list">
+          <li>200–300 ml every 15–20 min (moderate)</li>
+          <li>Match sweat rate in heat (up to 1–1.5 L/hr)</li>
+          <li>300–1000 mg sodium/hr for sessions &gt;60 min</li>
+          <li>Weigh before/after to refine plan</li>
+          <li>Cool fluids (10–15°C) improve palatability</li>
+        </ul>
+      </div>
+      <div class="sidebar-card">
+        <h3>Post-Workout Recovery</h3>
+        <ul class="sidebar-list">
+          <li>150% of weight lost in fluids over 2–4 hrs</li>
+          <li>1.5 g/kg carbs within 30 min post-exercise</li>
+          <li>Sodium: 500–700 mg per recovery liter</li>
+          <li>Monitor next-morning urine color</li>
+          <li>Body weight should return to pre within 24 hrs</li>
+        </ul>
+      </div>
+      <div class="sidebar-card">
+        <h3>Signs You're Under-Hydrated</h3>
+        <ul class="sidebar-list">
+          <li>Urine color ≥5 on Armstrong chart</li>
+          <li>&gt;2% body weight drop post-workout</li>
+          <li>Thirst + elevated heart rate at rest</li>
+          <li>Dark circles, sunken eyes (severe)</li>
+          <li>Performance drop vs hydrated baseline</li>
+        </ul>
+        <div class="ksi-ref">
+          <strong>KSI Reference:</strong> The Korey Stringer Institute advocates multi-marker hydration screening — combining urine color, body mass, thirst & symptoms — for all athletes in heat. This tool implements that framework.
+        </div>
+      </div>
+      <div class="ad-sidebar">
+        <script>atOptions={'key':'5b2625d96c11d7b599cea160717bc0f6','format':'iframe','height':250,'width':300,'params':{}};</script>
+        <script src="https://www.highperformanceformat.com/5b2625d96c11d7b599cea160717bc0f6/invoke.js"></script>
+        <script data-cfasync="false" src="https://adsterra-xxx2.js"></script>
+      </div>
+    </div>
+  </div>
+
+  <div class="ad-bottom">
+    <script>atOptions={'key':'5a3667e1a909df26029e97d7d01cf2b5','format':'iframe','height':50,'width':320,'params':{}};</script>
+    <script src="https://www.highperformanceformat.com/5a3667e1a909df26029e97d7d01cf2b5/invoke.js"></script>
+    <script data-cfasync="false" src="https://adsterra-xxx3.js"></script>
+  </div>
+</div>
+
+<footer>
+  <div class="container">
+    &copy; 2026 RunPerformance Tools | Hydration Status Checker — KSI × ACSM Athlete Reference Only
+  </div>
+</footer>
+
+<script>
+(function(){
+  const URINE_DATA = [
+    {n:1,color:'#FFFFCC',name:'Very Pale',score:100,status:'well'},
+    {n:2,color:'#FFFF99',name:'Pale Yellow',score:92,status:'well'},
+    {n:3,color:'#FFFF66',name:'Light Yellow',score:82,status:'ok'},
+    {n:4,color:'#FFE566',name:'Straw',score:70,status:'ok'},
+    {n:5,color:'#FFD700',name:'Amber',score:55,status:'mild'},
+    {n:6,color:'#E6A800',name:'Dark Amber',score:38,status:'mod'},
+    {n:7,color:'#CC7A00',name:'Very Dark',score:22,status:'severe'},
+    {n:8,color:'#8B4513',name:'Brown/Orange',score:8,status:'critical'}
+  ];
+
+  let useMetric = true;
+  let selectedUrine = null;
+  let assessMode = 'full';
+
+  const $ = id => document.getElementById(id);
+  const urineGrid = $('urineGrid');
+  const wUnits = document.querySelectorAll('.wUnit');
+  const volUnits = document.querySelectorAll('.volUnit');
+
+  // Build urine chart
+  URINE_DATA.forEach(u => {
+    const el = document.createElement('div');
+    el.className = 'urine-swatch';
+    el.dataset.n = u.n;
+    el.innerHTML = '<div class="swatch-color" style="background:' + u.color + '"></div><div class="swatch-num">' + u.n + '</div><div class="swatch-name">' + u.name + '</div>';
+    el.onclick = () => {
+      document.querySelectorAll('.urine-swatch').forEach(s => s.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedUrine = u.n;
+    };
+    urineGrid.appendChild(el);
+  });
+
+  // Symptom styling
+  document.querySelectorAll('.symptom-cb').forEach(cb => {
+    cb.addEventListener('change', () => {
+      cb.closest('.symptom-item').classList.toggle('checked', cb.checked);
+    });
+  });
+
+  // Unit toggle
+  $('unitMetric').onclick = () => { useMetric = true; $('unitMetric').classList.add('active'); $('unitImperial').classList.remove('active'); wUnits.forEach(e => e.textContent = 'kg'); volUnits.forEach(e => e.textContent = 'L'); };
+  $('unitImperial').onclick = () => { useMetric = false; $('unitMetric').classList.remove('active'); $('unitImperial').classList.add('active'); wUnits.forEach(e => e.textContent = 'lb'); volUnits.forEach(e => e.textContent = 'fl oz'); };
+
+  function toKg(v){ return useMetric ? v : v * 0.453592; }
+  function toL(v){ return useMetric ? v : v * 0.0295735; }
+  function fmtWeight(kg){
+    if(!kg && kg !== 0) return '—';
+    return useMetric ? kg.toFixed(2) + ' kg' : (kg * 2.20462).toFixed(2) + ' lb';
+  }
+  function fmtVol(L){
+    if(!L && L !== 0) return '—';
+    return useMetric ? L.toFixed(2) + ' L' : (L * 33.814).toFixed(0) + ' fl oz';
+  }
+
+  // Mode tabs
+  document.querySelectorAll('.mode-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      assessMode = tab.dataset.mode;
+      $('urineSection').style.display = assessMode === 'sweat' ? 'none' : 'block';
+      $('symptomSection').style.display = assessMode === 'sweat' ? 'none' : 'block';
+      $('intakeSection').style.display = assessMode === 'full' ? 'block' : 'none';
+      $('sweatSection').style.display = assessMode === 'urine' ? 'none' : 'block';
+    });
+  });
+
+  function getSymptomCount(){
+    return document.querySelectorAll('.symptom-cb:checked').length;
+  }
+
+  function assess(){
+    if((assessMode === 'full' || assessMode === 'urine') && !selectedUrine){
+      alert('Please select your urine color on the Armstrong chart.');
+      return;
+    }
+
+    const pre = parseFloat($('preWeight').value);
+    const post = parseFloat($('postWeight').value);
+    const fluidIn = parseFloat($('fluidIntake').value) || 0;
+    const durationMin = parseFloat($('exerciseDuration').value) || 60;
+    const bodyWt = parseFloat($('bodyWeight').value);
+    const dailyFluid = parseFloat($('dailyFluid').value);
+    const symptoms = getSymptomCount();
+    const env = $('sportEnv').value;
+
+    let urineScore = null, urineInfo = null;
+    if(selectedUrine){
+      urineInfo = URINE_DATA.find(u => u.n === selectedUrine);
+      urineScore = urineInfo.score;
+    }
+
+    let pctLoss = null, sweatRate = null, fluidLossL = null, rehydrateL = null, sodiumMg = null;
+    let hasSweatData = false;
+
+    if(assessMode !== 'urine' && !isNaN(pre) && !isNaN(post) && pre > 0 && post > 0){
+      hasSweatData = true;
+      const preKg = toKg(pre), postKg = toKg(post), fluidL = toL(fluidIn);
+      const lossKg = preKg - postKg;
+      pctLoss = (lossKg / preKg) * 100;
+      fluidLossL = Math.max(0, lossKg + fluidL);
+      const hours = durationMin / 60;
+      sweatRate = hours > 0 ? fluidLossL / hours : 0;
+      rehydrateL = fluidLossL * 1.5;
+      // ACSM sodium: ~500-700mg per liter sweat (avg 920mg/L for heavy sweaters, use 600)
+      sodiumMg = Math.round(fluidLossL * 600);
+    }
+
+    // Composite score
+    let scores = [];
+    if(urineScore !== null) scores.push(urineScore);
+    if(hasSweatData){
+      let sweatScore = 100;
+      if(pctLoss >= 3) sweatScore = 15;
+      else if(pctLoss >= 2) sweatScore = 35;
+      else if(pctLoss >= 1) sweatScore = 60;
+      else if(pctLoss >= 0.5) sweatScore = 80;
+      scores.push(sweatScore);
+    }
+    let symScore = Math.max(0, 100 - symptoms * 14);
+    if(assessMode !== 'sweat') scores.push(symScore);
+
+    let finalScore = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0) / scores.length) : 0;
+
+    // Status
+    let status, title, desc, bannerClass;
+    if(finalScore >= 80){ status='well'; title='Well Hydrated'; desc='Your markers indicate euhydration. Maintain current fluid & electrolyte strategy.'; bannerClass='status-well'; }
+    else if(finalScore >= 60){ status='mild'; title='Mildly Dehydrated'; desc='Some markers suggest fluid deficit. Increase intake before next training session.'; bannerClass='status-mild'; }
+    else if(finalScore >= 40){ status='mod'; title='Moderately Dehydrated'; desc='ACSM/KSI threshold approached. Prioritize rehydration with sodium-containing fluids.'; bannerClass='status-mod'; }
+    else if(finalScore >= 20){ status='severe'; title='Significantly Dehydrated'; desc='Performance & health risk elevated. Rehydrate aggressively; delay intense training.'; bannerClass='status-severe'; }
+    else { status='critical'; title='Severely Dehydrated'; desc='Seek medical attention if symptomatic. Do not exercise until hydration normalized.'; bannerClass='status-critical'; }
+
+    // Override with severe urine or weight loss
+    if(urineInfo && urineInfo.n >= 7){
+      bannerClass='status-severe'; title='Severely Dehydrated — Urine Marker';
+      desc='Urine color 7–8 indicates significant hypohydration per Armstrong/KSI protocols.';
+      if(finalScore > 20) finalScore = 20;
+    }
+    if(pctLoss !== null && pctLoss >= 3){ bannerClass='status-critical'; title='Critical Fluid Deficit'; desc='>3% body weight loss — ACSM recommends stopping exercise and medical evaluation if symptomatic.'; }
+
+    // Render
+    const banner = $('statusBanner');
+    banner.className = 'status-banner ' + bannerClass;
+    $('statusTitle').textContent = title;
+    $('statusDesc').textContent = desc;
+
+    const ring = $('scoreRing');
+    const ringColor = finalScore >= 80 ? 'var(--hydrated)' : finalScore >= 60 ? 'var(--mild)' : 'var(--danger)';
+    ring.style.borderColor = ringColor;
+    ring.style.color = ringColor;
+    $('scoreNum').textContent = finalScore;
+
+    $('resUrine').textContent = urineInfo ? '#' + urineInfo.n + ' — ' + urineInfo.name : '—';
+    $('resWeightLoss').textContent = hasSweatData ? pctLoss.toFixed(2) + '% (' + fmtWeight(toKg(pre) - toKg(post)) + ')' : '—';
+    $('resSweatRate').textContent = hasSweatData ? fmtVol(sweatRate) + '/hr' : '—';
+    $('resFluidLoss').textContent = hasSweatData ? fmtVol(fluidLossL) : '—';
+    $('resRehydrate').textContent = hasSweatData ? fmtVol(rehydrateL) + ' over 2–4 hrs' : '—';
+    $('resSodium').textContent = hasSweatData ? sodiumMg + ' mg (with recovery fluids)' : '—';
+    $('resSymptoms').textContent = symptoms === 0 ? 'None reported' : symptoms + '/8 symptoms (' + (symptoms >= 4 ? 'High risk' : symptoms >= 2 ? 'Moderate' : 'Low') + ')';
+
+    let dailyTxt = '—';
+    if(!isNaN(dailyFluid) && !isNaN(bodyWt) && bodyWt > 0){
+      const targetL = toKg(bodyWt) * 0.035;
+      const pct = (toL(dailyFluid) / targetL * 100).toFixed(0);
+      dailyTxt = fmtVol(toL(dailyFluid)) + ' / ' + fmtVol(targetL) + ' target (' + pct + '%)';
+    }
+    $('resDaily').textContent = dailyTxt;
+
+    // Actions
+    const actions = [];
+    if(urineInfo && urineInfo.n >= 4) actions.push('Drink 5–7 ml/kg body weight in the next 2–4 hours (ACSM pre-exercise protocol).');
+    if(urineInfo && urineInfo.n >= 6) actions.push('Add electrolyte drink with 500–700 mg sodium per liter — plain water alone is insufficient.');
+    if(hasSweatData && pctLoss >= 2) actions.push('Consume ' + fmtVol(rehydrateL) + ' fluid with sodium over the next 2–4 hours (150% replacement rule).');
+    if(hasSweatData && sweatRate > 1.2) actions.push('High sweat rate detected (' + fmtVol(sweatRate) + '/hr). Plan ' + fmtVol(sweatRate) + ' fluid intake per hour in similar conditions.');
+    if(symptoms >= 3) actions.push('Multiple symptoms present — rest, rehydrate, and recheck urine color in 2 hours.');
+    if(env === 'hot' || env === 'humid') actions.push('Hot/humid environment: pre-cool with cold fluids, increase sodium to 700–1000 mg/hr during exercise.');
+    if($('trainingPhase').value === 'race') actions.push('Race day: execute practiced hydration plan only — do not experiment with new fluids.');
+    if(actions.length === 0) actions.push('Maintain current hydration habits. Recheck urine color tomorrow morning.');
+    actions.push('Pair with electrolyte calculator for sodium/potassium targets during next session.');
+
+    $('actionList').innerHTML = actions.map(a => '<div class="action-item">' + a + '</div>').join('');
+    $('resultPanel').style.display = 'block';
+    $('resultPanel').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  $('assessBtn').onclick = assess;
+  $('printBtn').onclick = () => window.print();
+})();
+</script>
+</body>
+</html>
